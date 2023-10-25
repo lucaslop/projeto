@@ -107,6 +107,57 @@
     background: linear-gradient(90deg, #F44336 0%, #f5f5f5 100%);
 }
 
+
+    .arrow {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #4CAF50, #2196F3);
+      position: relative;
+      margin: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .arrow-up:before,
+    .arrow-down:before,
+    .arrow-left:before,
+    .arrow-right:before {
+      content: '';
+      position: absolute;
+      border: 5px solid transparent;
+    }
+
+    .arrow-up:before {
+      border-bottom-color: #fff;
+      top: 5px;
+    }
+
+    .arrow-down:before {
+      border-top-color: #fff;
+      bottom: 5px;
+    }
+
+    .arrow-left:before {
+      border-right-color: #fff;
+      left: 5px;
+    }
+
+    .arrow-right:before {
+      border-left-color: #fff;
+      right: 5px;
+    }
+
+    .arrow-on {
+      opacity: 1;
+    }
+
+    .arrow-off {
+      opacity: 0.3;
+    }
+
+
     </style>
 </head>
 <body>
@@ -121,12 +172,61 @@
         <button class="button" id="simulateBatteryButton">Simular Bateria Esgotada</button>
 
         <div class="battery-container">
-            <div class="battery" id="battery"></div>
-            <div>Bateria</div>
-        </div>
+    <div class="battery" id="battery"></div>
+    <div>Bateria</div>
+    <div class="arrows-container">
+        <div>
+                <div class="arrow arrow-up arrow-off" id="arrowUp"></div>
+                <div class="arrow arrow-down arrow-off" id="arrowDown"></div>
+                <div class="arrow arrow-left arrow-off" id="arrowLeft"></div>
+                <div class="arrow arrow-right arrow-off" id="arrowRight"></div>
+            </div>
+    </div>
+</div>
+
     </div>
     <div class="grid-container" id="grid"></div>
     <script>
+ const arrowUp = document.getElementById('arrowUp');
+        const arrowDown = document.getElementById('arrowDown');
+        const arrowLeft = document.getElementById('arrowLeft');
+        const arrowRight = document.getElementById('arrowRight');
+
+
+
+        
+        function updateArrows() {
+            if (blockPosition.row % 2 === 0) {
+                arrowRight.classList.add('arrow-on');
+                arrowRight.classList.remove('arrow-off');
+                arrowLeft.classList.add('arrow-off');
+                arrowLeft.classList.remove('arrow-on');
+            } else {
+                arrowLeft.classList.add('arrow-on');
+                arrowLeft.classList.remove('arrow-off');
+                arrowRight.classList.add('arrow-off');
+                arrowRight.classList.remove('arrow-on');
+            }
+
+            if (blockPosition.row !== lastRowPosition) {
+                arrowDown.classList.add('arrow-on');
+                arrowDown.classList.remove('arrow-off');
+            } else {
+                arrowDown.classList.add('arrow-off');
+                arrowDown.classList.remove('arrow-on');
+            }
+        }
+
+        function flashDownArrow() {
+            arrowDown.classList.add('arrow-on');
+            arrowDown.classList.remove('arrow-off');
+
+            setTimeout(() => {
+                arrowDown.classList.add('arrow-off');
+                arrowDown.classList.remove('arrow-on');
+                updateArrows();
+            }, 500); // Ajuste o tempo conforme desejado
+        }
         const grid = document.getElementById('grid');
         const powerButton = document.getElementById('powerButton');
         const powerOffButton = document.getElementById('powerOffButton');
@@ -188,6 +288,7 @@
                 block.classList.add('red');
             }
             grid.children[blockPosition.row * 9 + blockPosition.col].appendChild(block);
+            updateArrows();
         }
         
         
@@ -230,6 +331,8 @@ simulateBatteryButton.addEventListener('click', () => {
                     movingRight = true;
                 }
             }
+			lastRowPosition = blockPosition.row;
+             updateArrows(); 
 
             placeBlock();
             decreaseBatteryLevel();
