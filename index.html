@@ -103,6 +103,10 @@
         .block.black {
             background-color: #000;
         }
+        .battery-red {
+    background: linear-gradient(90deg, #F44336 0%, #f5f5f5 100%);
+}
+
     </style>
 </head>
 <body>
@@ -114,6 +118,8 @@
         <button class="button" id="stopButton">Parar Movimento</button>
         <button class="button" id="resetButton">Resetar</button>
         <button class="button" id="powerOffButton">Desligar</button>
+        <button class="button" id="simulateBatteryButton">Simular Bateria Esgotada</button>
+
         <div class="battery-container">
             <div class="battery" id="battery"></div>
             <div>Bateria</div>
@@ -183,6 +189,24 @@
             }
             grid.children[blockPosition.row * 9 + blockPosition.col].appendChild(block);
         }
+        
+        
+        const simulateBatteryButton = document.getElementById('simulateBatteryButton');
+const batteryText = document.querySelector('.battery-container div');
+
+simulateBatteryButton.addEventListener('click', () => {
+    // Define a bateria como vazia
+    batteryLevel = 0;
+    updateBatteryLevel();
+
+    // Pare o cortador de grama se estiver em execução
+    if (isAnimationStarted) {
+        toggleStart();
+    }
+
+    // Mude a classe da bateria para "battery-red"
+    battery.classList.add('battery-red');
+});
 
         function moveBlock() {
             if (blockPosition.row === 7 && blockPosition.col === 0) {
@@ -211,17 +235,7 @@
             decreaseBatteryLevel();
         }
 
-        function startAnimation() {
-            if (blockPosition.row === 8) {
-                blockPosition = { row: 0, col: 0 };
-                createGrid();
-            }
-            if (!isAnimationStarted && isPowerOn) {
-                isAnimationStarted = true;
-                animationInterval = setInterval(moveBlock, animationSpeed);
-            }
-        }
-
+        
         function stopAnimation() {
             clearInterval(animationInterval);
             isAnimationStarted = false;
@@ -237,11 +251,15 @@
         }
 
         function decreaseBatteryLevel() {
-            if (batteryLevel > 0) {
-                batteryLevel -= 1;
-                updateBatteryLevel();
-            }
-        }
+    if (batteryLevel > 0) {
+        batteryLevel -= 1;
+        updateBatteryLevel();
+    } else {
+        stopAnimation(); // Pare a animação quando a bateria estiver vazia
+        battery.classList.add('battery-red'); // Mude a classe da bateria para vermelho
+        startButton.disabled = true; // Desative o botão "Iniciar Movimento" quando a bateria estiver vazia
+    }
+}
 
         function updateBatteryLevel() {
             battery.style.width = `${batteryLevel}%`;
@@ -262,7 +280,9 @@
             }
         }
 
-        function toggleStart() {
+      function toggleStart() {
+    if (isPowerOn) {
+        if (batteryLevel > 0) { // Verifique se há carga na bateria
             if (isAnimationStarted) {
                 startLed.classList.remove('led-on');
                 startLed.classList.add('led-off');
@@ -273,7 +293,19 @@
                 startAnimation();
             }
         }
+    }
+}
 
+        function startAnimation() {
+            if (blockPosition.row === 8) {
+                blockPosition = { row: 0, col: 0 };
+                createGrid();
+            }
+            if (!isAnimationStarted && isPowerOn && batteryLevel > 0) { // Verifica se o poder está ligado e há bateria
+                isAnimationStarted = true;
+                animationInterval = setInterval(moveBlock, animationSpeed);
+            }
+        }
         powerButton.addEventListener('click', togglePower);
         powerOffButton.addEventListener('click', () => {
             togglePower();
