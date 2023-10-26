@@ -139,11 +139,30 @@
         .arrow-off {
             opacity: 0.3;
         }
+        
+        .horn {
+    width: 50px;
+    height: 50px;
+    background-color: #F44336;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #fff;
+}
+
+.horn-off {
+    background-color: #ccc;
+    color: #666;
+}
+
 
 
     </style>
 </head>
 <body>
+      <audio id="hornSound" src="./media/audio.wav" type="audio/mpeg"></audio>
     <div class="controls">
         <div class="led led-off" id="powerLed"></div>
         <button class="button" id="powerButton">Ligar</button>
@@ -152,6 +171,10 @@
         <button class="button" id="stopButton">Parar Movimento</button>
         <button class="button" id="resetButton">Resetar</button>
         <button class="button" id="powerOffButton">Desligar</button>
+         <div class="led led-off" id="unexpectedLed"></div>
+        <button class="button" id="unexpectedButton">Simular Evento Inesperado</button>
+
+        <div class="horn horn-off" id="horn">📣</div>
         <button class="button" id="simulateBatteryButton">Simular Bateria Esgotada</button>
 
         <div class="battery-container">
@@ -170,6 +193,33 @@
     </div>
     <div class="grid-container" id="grid"></div>
     <script>
+    
+    let isBlockMoving = true;
+
+    const unexpectedButton = document.getElementById('unexpectedButton');
+        const unexpectedLed = document.getElementById('unexpectedLed');
+        const horn = document.getElementById('horn');
+
+        unexpectedButton.addEventListener('click', () => {
+            unexpectedLed.classList.toggle('led-off');
+    unexpectedLed.classList.toggle('led-on');
+    horn.classList.toggle('horn-off');
+    horn.classList.toggle('horn-on');
+    playHorn();
+    
+    isBlockMoving = !isBlockMoving;  // Alterna o estado de movimento do bloco
+    if (isBlockMoving) {
+        startAnimation();  // Se o bloco deve se mover, retoma a animação
+    } else {
+        stopAnimation();  // Se o bloco deve parar, para a animação
+    }
+        });
+
+        function playHorn() {
+            const hornSound = document.getElementById('hornSound');
+            hornSound.play();
+        }
+        
  const arrowUp = document.getElementById('arrowUp');
         const arrowDown = document.getElementById('arrowDown');
         const arrowLeft = document.getElementById('arrowLeft');
