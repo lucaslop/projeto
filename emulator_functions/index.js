@@ -77,7 +77,8 @@ const resetButton = document.getElementById('resetButton');
 const battery = document.getElementById('battery');
 const powerLed = document.getElementById('powerLed');
 const startLed = document.getElementById('startLed');
-let blockPosition = { row: 0, col: 0 };
+const blockDir = { right: '0deg', left: '180deg', up: '-90deg', down: '90deg' }
+let blockPosition = { row: 0, col: 0, dir: 'right' };
 let movingRight = true;
 let animationSpeed = 500; // Ajuste a velocidade desejada (em milissegundos)
 let animationInterval;
@@ -127,9 +128,11 @@ function placeBlock() {
 
     const block = document.createElement('div');
     block.classList.add('block');
+    block.style.cssText = `transform: rotate(${blockDir[blockPosition.dir]})`
 
     if (blockPosition.row === 7 && blockPosition.col === 0) {
-        block.classList.add('red');
+        block.classList.add('ok');
+        block.style.cssText = `transform: rotate(90deg)`
     }
 
     grid.children[blockPosition.row * 9 + blockPosition.col].appendChild(block);
@@ -176,8 +179,11 @@ function moveBlock() {
             movingRight = true;
         }
     }
+
+    console.log(movingRight ? 'right' : 'left')
+    blockPosition.dir = movingRight ? 'right' : 'left'
     lastRowPosition = blockPosition.row;
-        updateArrows(); 
+    updateArrows(); 
 
     placeBlock();
     decreaseBatteryLevel();
