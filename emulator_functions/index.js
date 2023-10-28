@@ -86,17 +86,6 @@ let batteryLevel = 100;
 let isPowerOn = false;
 let isAnimationStarted = false;
 
-// Adiciona três blocos pretos em posições aleatórias
-const blackBlocks = [];
-
-while (blackBlocks.length < 3) {
-    const randomRow = Math.floor(Math.random() * 7);
-    const randomCol = Math.floor(Math.random() * 8);
-    if (blackBlocks.every(block => block.row !== randomRow || block.col !== randomCol)) {
-        blackBlocks.push({ row: randomRow, col: randomCol });
-    }
-}
-
 function createGrid() {
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 9; col++) {
@@ -120,11 +109,6 @@ function placeBlock() {
         }
     }
 
-    blackBlocks.forEach((block) => {
-        const blackBlock = document.createElement('div');
-        blackBlock.classList.add('block', 'black');
-        grid.children[block.row * 9 + block.col].appendChild(blackBlock);
-    });
 
     const block = document.createElement('div');
     block.classList.add('block');
