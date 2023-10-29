@@ -91,11 +91,16 @@ const blackBlocks = [];
 
 while (blackBlocks.length < 3) {
     const randomRow = Math.floor(Math.random() * 7);
-    const randomCol = Math.floor(Math.random() * 8);
-    if (blackBlocks.every(block => block.row !== randomRow || block.col !== randomCol)) {
+    const randomCol = Math.floor(Math.random() * 7) + 1;  // Começa de 1 para evitar a primeira coluna
+    if (randomCol !== 5 && blackBlocks.every(block => {
+        const rowDiff = Math.abs(block.row - randomRow);
+        const colDiff = Math.abs(block.col - randomCol);
+        return rowDiff > 1 || colDiff > 1 || (rowDiff === 1 && colDiff === 1);
+    })) {
         blackBlocks.push({ row: randomRow, col: randomCol });
     }
 }
+
 
 function createGrid() {
     for (let row = 0; row < 8; row++) {
@@ -106,8 +111,21 @@ function createGrid() {
         }
     }
 
+    purpleBlock = document.createElement('div');
+    purpleBlock.classList.add('block-purple', 'purple');
+
+    // Define a posição inicial do bloco roxo de forma aleatória
+    const randomRow = Math.floor(Math.random() * 8);
+    purpleBlockPosition.row = randomRow;
+    purpleBlockPosition.col = 5;
+
+    grid.children[randomRow * 9 + 5].appendChild(purpleBlock);
+
     placeBlock();
 }
+
+
+
 
 function placeBlock() {
     grid.innerHTML = ''; // Limpa a grade
@@ -120,24 +138,30 @@ function placeBlock() {
         }
     }
 
-    blackBlocks.forEach((block) => {
+    // Adiciona o bloco roxo novamente
+    grid.children[purpleBlockPosition.row * 9 + purpleBlockPosition.col].appendChild(purpleBlock);
+
+    blackBlocks.forEach((block, index) => {
         const blackBlock = document.createElement('div');
-        blackBlock.classList.add('block', 'black');
+        blackBlock.classList.add('block', `block-black-${index + 1}`);
         grid.children[block.row * 9 + block.col].appendChild(blackBlock);
     });
 
     const block = document.createElement('div');
     block.classList.add('block');
-    block.style.cssText = `transform: rotate(${blockDir[blockPosition.dir]})`
+    block.style.cssText = `transform: rotate(${blockDir[blockPosition.dir]})`;
 
     if (blockPosition.row === 7 && blockPosition.col === 0) {
         block.classList.add('ok');
-        block.style.cssText = `transform: rotate(90deg)`
+        block.style.cssText = `transform: rotate(90deg)`;
     }
 
     grid.children[blockPosition.row * 9 + blockPosition.col].appendChild(block);
     updateArrows();
 }
+
+
+
         
         
 const simulateBatteryButton = document.getElementById('simulateBatteryButton');
@@ -162,6 +186,8 @@ function moveBlock() {
         return; // Bloquinho está na última posição, não faz nada
     }
 
+
+    
     grid.children[blockPosition.row * 9 + blockPosition.col].removeChild(grid.children[blockPosition.row * 9 + blockPosition.col].firstChild);
 
     if (movingRight) {
@@ -189,7 +215,39 @@ function moveBlock() {
     decreaseBatteryLevel();
 }
 
-        
+       
+
+let purpleBlockPosition = { row: 0, col: 5 };  // Adicione esta linha para rastrear a posição do bloco roxo
+let movingDown = true;  // Adicione esta linha para rastrear a direção do movimento do bloco roxo
+
+function movePurpleBlock() {
+    const previousRow = purpleBlockPosition.row;
+
+    if (movingDown) {
+        // Verifica se o bloco que se move estará na posição abaixo do bloco roxo
+        if (purpleBlockPosition.row < 7 && (blockPosition.row !== purpleBlockPosition.row + 1 || blockPosition.col !== purpleBlockPosition.col)) {
+            purpleBlockPosition.row++;
+        } else {
+            movingDown = false;
+        }
+    } else {
+        // Verifica se o bloco que se move estará na posição acima do bloco roxo
+        if (purpleBlockPosition.row > 0 && (blockPosition.row !== purpleBlockPosition.row - 1 || blockPosition.col !== purpleBlockPosition.col)) {
+            purpleBlockPosition.row--;
+        } else {
+            movingDown = true;
+        }
+    }
+
+    // Verifica se o bloco roxo está na mesma posição do bloco preto
+    if (blackBlocks.some(block => block.row === purpleBlockPosition.row && block.col === purpleBlockPosition.col)) {
+        movingDown = !movingDown;  // Inverte a direção do movimento
+    }
+
+    // Atualiza a posição do bloco roxo na grade
+    grid.children[purpleBlockPosition.row * 9 + purpleBlockPosition.col].appendChild(purpleBlock);
+}
+
 function stopAnimation() {
     clearInterval(animationInterval);
     isAnimationStarted = false;
@@ -201,6 +259,7 @@ function resetAnimation() {
     blockPosition = { row: 0, col: 0 };
     movingRight = true;
     batteryLevel = 100;
+    purpleBlock.style.display = 'block';  // Mantém o bloco roxo visível
     updateBatteryLevel();
 }
 
@@ -244,11 +303,13 @@ function toggleStart() {
             } else {
                 startLed.classList.remove('led-off');
                 startLed.classList.add('led-on');
+                purpleBlock.style.display = 'block';  // Mostra o bloco roxo
                 startAnimation();
             }
         }
     }
 }
+let purpleBlockInterval;
 
 function startAnimation() {
     if (blockPosition.row === 8) {
@@ -257,8 +318,20 @@ function startAnimation() {
     }
     if (!isAnimationStarted && isPowerOn && batteryLevel > 0) { // Verifica se o poder está ligado e há bateria
         isAnimationStarted = true;
-        animationInterval = setInterval(moveBlock, animationSpeed);
+        animationInterval = setInterval(() => {
+            moveBlock();
+        }, animationSpeed);  // Mantém a velocidade original para o bloco
+
+        purpleBlockInterval = setInterval(() => {
+            movePurpleBlock();  // Adicione esta linha para mover o bloco roxo
+        }, animationSpeed / 2);  // Aumenta a velocidade do bloco roxo
     }
+}
+
+function stopAnimation() {
+    clearInterval(animationInterval);
+    clearInterval(purpleBlockInterval);  // Adicione esta linha para limpar o intervalo do bloco roxo
+    isAnimationStarted = false;
 }
 
 powerButton.addEventListener('click', togglePower);

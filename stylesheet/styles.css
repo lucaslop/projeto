@@ -84,13 +84,48 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+
 .block {
   width: 50px;
   height: 50px;
-  background: url('../media/cortador-grama.jpg');
+  background: url('../media/cortador-grama.png');
   background-position: center;
   background-size: cover;
 }
+
+.block-rotate {
+  animation: rotate 2s linear; /* Adicione esta linha */
+}
+
+
+
+.block-black-1 {
+  background: url('../media/arvore.png');
+  background-position: center;
+  background-size: cover;
+}
+
+.block-black-2 {
+  background: url('../media/churrasqueira.png');
+  background-position: center;
+  background-size: cover;
+}
+
+.block-black-3 {
+  background: url('../media/bola.png');
+  background-position: center;
+  background-size: cover;
+}
+
+.block-purple {
+  background: url('../media/cachorro.png');
+  background-position: center;
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+}
+
+
 
 .block.ok {
   /* background: none; */
