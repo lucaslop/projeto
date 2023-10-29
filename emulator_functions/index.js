@@ -3,35 +3,42 @@ let isBlockMoving = true;
 const unexpectedButton = document.getElementById('unexpectedButton');
 const unexpectedLed = document.getElementById('unexpectedLed');
 const horn = document.getElementById('horn');
+const arrowUp = document.getElementById('arrowUp');
+const arrowDown = document.getElementById('arrowDown');
+const arrowLeft = document.getElementById('arrowLeft');
+const arrowRight = document.getElementById('arrowRight');
+const grid = document.getElementById('grid');
+const powerButton = document.getElementById('powerButton');
+const powerOffButton = document.getElementById('powerOffButton');
+const startButton = document.getElementById('startButton');
+const stopButton = document.getElementById('stopButton');
+const resetButton = document.getElementById('resetButton');
+const battery = document.getElementById('battery');
+const powerLed = document.getElementById('powerLed');
+const startLed = document.getElementById('startLed');
+const simulateBatteryButton = document.getElementById('simulateBatteryButton');
+const batteryText = document.querySelector('.battery-container div');
+const blockDir = { right: '-90deg', left: '90deg', up: '180deg', down: '0deg' }
+let blockPosition = { row: 0, col: 0, dir: 'right' };
+let movingRight = true;
+let arrowDirection = '';  
+let animationSpeed = 500; // Ajuste a velocidade desejada (em milissegundos)
+let animationInterval;
+let batteryLevel = 100;
+let isPowerOn = false;
+let isAnimationStarted = false;
+let purpleBlockPosition = { row: 0, col: 5 };  // pet
+let movingDown = true;  // rastrear pet
+let purpleBlockInterval;
 
-unexpectedButton.addEventListener('click', () => {
-    unexpectedLed.classList.toggle('led-off');
-    unexpectedLed.classList.toggle('led-on');
-
-    horn.classList.toggle('horn-off');
-    horn.classList.toggle('horn-on');
-
-    playHorn();
-        
-    isBlockMoving = !isBlockMoving;  // Alterna o estado de movimento do bloco
-    if (isBlockMoving) {
-        startAnimation();  // Se o bloco deve se mover, retoma a animação
-    } else {
-        stopAnimation();  // Se o bloco deve parar, para a animação
-    }
-});
+const blackBlocks = [];
 
 function playHorn() {
     const hornSound = document.getElementById('hornSound');
     hornSound.play();
 }
         
-const arrowUp = document.getElementById('arrowUp');
-const arrowDown = document.getElementById('arrowDown');
-const arrowLeft = document.getElementById('arrowLeft');
-const arrowRight = document.getElementById('arrowRight');
 
-let arrowDirection = '';  // Adicione esta linha no início do seu script
 
         
 function updateArrows() {
@@ -66,28 +73,10 @@ function flashDownArrow() {
         arrowDown.classList.add('arrow-off');
         arrowDown.classList.remove('arrow-on');
         updateArrows();
-    }, 500); // Ajuste o tempo conforme desejado
+    }, 500); 
 }
-const grid = document.getElementById('grid');
-const powerButton = document.getElementById('powerButton');
-const powerOffButton = document.getElementById('powerOffButton');
-const startButton = document.getElementById('startButton');
-const stopButton = document.getElementById('stopButton');
-const resetButton = document.getElementById('resetButton');
-const battery = document.getElementById('battery');
-const powerLed = document.getElementById('powerLed');
-const startLed = document.getElementById('startLed');
-const blockDir = { right: '-90deg', left: '90deg', up: '180deg', down: '0deg' }
-let blockPosition = { row: 0, col: 0, dir: 'right' };
-let movingRight = true;
-let animationSpeed = 500; // Ajuste a velocidade desejada (em milissegundos)
-let animationInterval;
-let batteryLevel = 100;
-let isPowerOn = false;
-let isAnimationStarted = false;
 
-// Adiciona três blocos pretos em posições aleatórias
-const blackBlocks = [];
+
 
 while (blackBlocks.length < 3) {
     const randomRow = Math.floor(Math.random() * 7);
@@ -162,31 +151,10 @@ function placeBlock() {
 
 
 
-        
-        
-const simulateBatteryButton = document.getElementById('simulateBatteryButton');
-const batteryText = document.querySelector('.battery-container div');
-
-simulateBatteryButton.addEventListener('click', () => {
-    // Define a bateria como vazia
-    batteryLevel = 0;
-    updateBatteryLevel();
-
-    // Pare o cortador de grama se estiver em execução
-    if (isAnimationStarted) {
-        toggleStart();
-    }
-
-    // Mude a classe da bateria para "battery-red"
-    battery.classList.add('battery-red');
-});
-
 function moveBlock() {
     if (blockPosition.row === 7 && blockPosition.col === 0) {
         return; // Bloquinho está na última posição, não faz nada
     }
-
-
     
     grid.children[blockPosition.row * 9 + blockPosition.col].removeChild(grid.children[blockPosition.row * 9 + blockPosition.col].firstChild);
 
@@ -216,9 +184,6 @@ function moveBlock() {
 }
 
        
-
-let purpleBlockPosition = { row: 0, col: 5 };  // Adicione esta linha para rastrear a posição do bloco roxo
-let movingDown = true;  // Adicione esta linha para rastrear a direção do movimento do bloco roxo
 
 function movePurpleBlock() {
     const previousRow = purpleBlockPosition.row;
@@ -268,9 +233,9 @@ function decreaseBatteryLevel() {
         batteryLevel -= 1;
         updateBatteryLevel();
     } else {
-        stopAnimation(); // Pare a animação quando a bateria estiver vazia
-        battery.classList.add('battery-red'); // Mude a classe da bateria para vermelho
-        startButton.disabled = true; // Desative o botão "Iniciar Movimento" quando a bateria estiver vazia
+        stopAnimation(); // Para a animação quando a bateria estiver vazia
+        battery.classList.add('battery-red'); // Muda a classe da bateria para vermelho
+        startButton.disabled = true; // Desativa o botão "Iniciar Movimento" quando a bateria estiver vazia
     }
 }
 
@@ -309,7 +274,7 @@ function toggleStart() {
         }
     }
 }
-let purpleBlockInterval;
+
 
 function startAnimation() {
     if (blockPosition.row === 8) {
@@ -345,6 +310,38 @@ stopButton.addEventListener('click', toggleStart);
 
 resetButton.addEventListener('click', () => {
     location.reload()
+});
+
+
+simulateBatteryButton.addEventListener('click', () => {
+    // Define a bateria como vazia
+    batteryLevel = 0;
+    updateBatteryLevel();
+
+    // Pare o cortador de grama se estiver em execução
+    if (isAnimationStarted) {
+        toggleStart();
+    }
+
+    // Mude a classe da bateria para "battery-red"
+    battery.classList.add('battery-red');
+});
+
+unexpectedButton.addEventListener('click', () => {
+    unexpectedLed.classList.toggle('led-off');
+    unexpectedLed.classList.toggle('led-on');
+
+    horn.classList.toggle('horn-off');
+    horn.classList.toggle('horn-on');
+
+    playHorn();
+        
+    isBlockMoving = !isBlockMoving;  // Alterna o estado de movimento do bloco
+    if (isBlockMoving) {
+        startAnimation();  // Se o bloco deve se mover, retoma a animação
+    } else {
+        stopAnimation();  // Se o bloco deve parar, para a animação
+    }
 });
 
 createGrid();
